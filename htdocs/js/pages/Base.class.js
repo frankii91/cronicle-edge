@@ -33,6 +33,15 @@ Class.subclass(Page, "Page.Base", {
 						if (session_id) self.setPref('session_id', '');
 						setTimeout(function () { Nav.go('Login'); }, 1);
 					}
+				}, function () {
+					// Cloudflare Access returns 401 for an expired Access session when
+					// this request carries X-Requested-With. Promote the retry to a
+					// top-level navigation so Access can run its interactive OIDC flow
+					// instead of leaving a partially rendered Cronicle shell.
+					if (app._accessSessionRecoveryRedirect) return;
+					app._accessSessionRecoveryRedirect = true;
+					Debug.trace("Session recovery API was rejected, retrying as top-level navigation");
+					window.location.assign(window.location.href);
 				});
 
 			return false;
