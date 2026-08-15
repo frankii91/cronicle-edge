@@ -17,11 +17,12 @@ Images:
  docker run -it --rm -p 3012:3012 ghcr.io/cronicle-edge/cronicle-edge:main manager
 
 # typical local setup
+# Generate a unique secret for each deployment; never replace this with a public example value.
  mkdir -p $HOME/cron && docker run -d --name cron \
  --hostname manager1 \
  -p 3012:3012 --restart always  \
  -v $HOME/cron:/opt/cronicle/data  \
- -e CRONICLE_secret_key=mysecretKey  \
+ -e CRONICLE_secret_key="$(openssl rand -hex 32)"  \
  cronicle/edge:v1.13.3 manager 
 ```
 
