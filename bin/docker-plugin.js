@@ -77,6 +77,10 @@ const cname = 'cronicle-' + (process.env['JOB_ID'] || process.pid)
 let imageName = process.env['IMAGE'] || 'alpine'
 let volumes = process.env['VOLUMES']
 let network = process.env['NETWORK']
+const allowedNetworks = ['', 'default', 'bridge', 'none']
+if (!allowedNetworks.includes(network || '')) {
+    exit(`Unsupported Docker network mode: ${network}. Allowed modes: default, bridge, none`)
+}
 let script = process.env['SCRIPT'] ?? "#!/bin/sh\necho 'No script specified'"
 const autoPull = !!parseInt(process.env['PULL_IMAGE'])
 const autoRemove = !parseInt(process.env['KEEP_CONTAINER'])
