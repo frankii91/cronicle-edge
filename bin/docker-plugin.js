@@ -182,18 +182,28 @@ const dockerRun = async () => {
 
     // create tar archive for entrypoint script
     const pack = tar.pack()
+    const archiveNames = new Set([path.posix.basename(ENTRYPOINT_PATH)])
 
     pack.entry({ name: path.basename(ENTRYPOINT_PATH), mode: 0o755 }, script)
 
     if (job.chain_data) {
         pack.entry({ name: 'chain_data'}, JSON.stringify(job.chain_data))
+        archiveNames.add('chain_data')
     }
     
     // attach file
 	if(Array.isArray(job.files)) {
 		job.files.forEach((e)=> {
             if(e.name) { 
-                pack.entry({  name: e.name }, e.content || '')
+                const name = e.name
+                const normalizedName = typeof(name) === 'string' ? path.posix.normalize(name) : ''
+                const unsafeName = !normalizedName || normalizedName === '.' || path.posix.isAbsolute(normalizedName) ||
+                    name.includes('\\') || name.split('/').includes('..') || /[\0\r\n]/.test(name) || archiveNames.has(normalizedName)
+
+                if(unsafeName) exit(`Invalid Docker attachment filename: ${name}`)
+
+                archiveNames.add(normalizedName)
+                pack.entry({  name: normalizedName }, e.content || '')
 			}
 		})
 	}
