@@ -106,4 +106,3 @@ fi
 exec $BINARY --echo --foreground --manager --color $color --debug $debug
 
 
-
