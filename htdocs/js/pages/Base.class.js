@@ -178,7 +178,7 @@ Class.subclass(Page, "Page.Base", {
 		let nice_arg = encode_entities(`${arg || ''}`)
 		if(nice_arg.length > maxWidth) nice_arg = nice_arg.substring(0,maxWidth-3) + "..."
 		let href = '#History?sub=error_history'
-		if(context.id) href += ('&id=' + context.id)
+		if(context.id) href += ('&id=' + encodeURIComponent(context.id))
 		if(context.error) href += '&error=1'
 		return `<a href="${href}&max=25&arg=${encodeURIComponent(arg)}">${nice_arg}</a>`
 	},
