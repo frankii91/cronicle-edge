@@ -55,8 +55,8 @@ bundle script will also print instruction how to setup cronicle as service.
 
 ## Try multinode setup with Docker swarm
 ```bash
-# before deploying stack, set up a secret_key as docker secret, e.g.:
-# echo 123456 | docker secret create secret_key -
+# before deploying the stack, generate a unique, high-entropy secret_key (do not use this command's output in another cluster):
+openssl rand -hex 32 | docker secret create secret_key -
 docker stack deploy --compose-file  Docker/LocalCluster.yaml cron_stack
 # then go to admin/servers and add nodes called worker1 and worker2 manually
 ```
