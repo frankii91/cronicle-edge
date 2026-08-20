@@ -88,17 +88,23 @@ jobs:
         env:
           DOCKERHUB_USERNAME: ${{ secrets.DHUB_USER }}
           DOCKERHUB_TOKEN: ${{ secrets.DHUB_TOKEN }}
+          EVENT_NAME: ${{ github.event_name }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
         run: |
           echo "building for $DOCKERHUB_USERNAME"
-          echo "$DOCKERHUB_TOKEN" | docker login --username "$DOCKERHUB_USERNAME" --password-stdin
-          if [ "${{ github.event_name }}" == "push" ]; then
+          if [ "$EVENT_NAME" = "push" ]; then
             TAG="latest"
-          elif [ "${{ github.event_name }}" == "release" ]; then
-            TAG="${{ github.event.release.tag_name }}"
+          elif [ "$EVENT_NAME" = "release" ]; then
+            TAG="$RELEASE_TAG"
+            if [[ ! "$TAG" =~ ^[A-Za-z0-9_][A-Za-z0-9_.-]{0,127}$ ]]; then
+              echo "Invalid Docker tag"
+              exit 1
+            fi
           else
-            echo "Unsupported event: ${{ github.event_name }}"
+            echo "Unsupported event: $EVENT_NAME"
             exit 1
           fi
+          echo "$DOCKERHUB_TOKEN" | docker login --username "$DOCKERHUB_USERNAME" --password-stdin
           echo "publishing tag $TAG"
           docker build -t cronicle/edge:$TAG -f Dockerfile .
           docker push cronicle/edge:$TAG    
