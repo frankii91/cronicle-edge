@@ -21,10 +21,13 @@ For actual use:
 - you may optionally use *--net=host* parameter if interacting with cronicle nodes on other machines (in this case don't use hostname parameter, it should be the same as your host)
 - you can specify secret_key via env variable. CRONICLE_manager=1 will start up cronicle right away (only use on single manager node/cluster)
 
+Generate a strong, unique secret and store it securely so the same value can be reused by every node in the cluster:
+
 ```bash
+CRONICLE_SECRET_KEY="$(openssl rand -hex 32)"
 docker run -d --hostname manager1 --restart=always \
   -e CRONICLE_manager=1 \
-  -e CRONICLE_secret_key=123456 \
+  -e CRONICLE_secret_key="$CRONICLE_SECRET_KEY" \
   -p 3012:3012 \
   -v $HOME/data:/opt/cronicle/data \
   cronicle/cronicle:edge manager
