@@ -221,9 +221,9 @@ Class.subclass(Page.Base, "Page.Schedule", {
 		if (!file) return // sanity check
 
 		let html = '<table>' +
-			get_form_table_row('Name', `<input type="text" id="fe_ee_pp_file_name" size="40" value="${file.name}" spellcheck="false">`) +
+			get_form_table_row('Name', `<input type="text" id="fe_ee_pp_file_name" size="40" value="${escape_text_field_value(file.name)}" spellcheck="false">`) +
 			get_form_table_spacer() +
-			get_form_table_row('Content', `<textarea style="padding-right:20px"  id="fe_ee_pp_file_content" rows="36" cols="110">${file.content}</textarea>`)
+			get_form_table_row('Content', `<textarea style="padding-right:20px"  id="fe_ee_pp_file_content" rows="36" cols="110">${escape_text_field_value(file.content)}</textarea>`)
 		html += '</table>'
 
 		setTimeout(() => self.setFileEditor(file.name), 30) // editor needs to wait for a bit for modal window to render
