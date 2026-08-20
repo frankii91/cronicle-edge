@@ -6,6 +6,7 @@ const conn = new Client();
 const {EOL} = require('os')
 const JSONStream = require('pixl-json-stream');
 const { spawn } = require('child_process')
+const { createHash, timingSafeEqual } = require('crypto')
 
 const print = (text) => {
 	process.stdout.write(text + EOL);
@@ -125,6 +126,19 @@ function printJSONmessage(complete, code, desc) {
             port: parseInt(uri.port) || 22,
             username: uri.username,
             pty: true
+        }
+
+        // ssh2 otherwise accepts any server key. Pin the OpenSSH SHA256
+        // fingerprint before authentication so credentials and scripts cannot be
+        // disclosed to an impersonating server.
+        const hostFingerprint = (process.env['SSH_HOST_FINGERPRINT'] || uri.searchParams.get('hostFingerprint') || '').replace(/\s/g, '+')
+        const fingerprintMatch = hostFingerprint.match(/^SHA256:([A-Za-z0-9+/]{43}=?)$/)
+        const expectedHostKeyHash = fingerprintMatch ? Buffer.from(fingerprintMatch[1], 'base64') : null
+
+        conf.hostVerifier = (key) => {
+            if (!expectedHostKeyHash) return false
+            const actualHostKeyHash = createHash('sha256').update(key).digest()
+            return actualHostKeyHash.length === expectedHostKeyHash.length && timingSafeEqual(actualHostKeyHash, expectedHostKeyHash)
         }
 
         if (uri.password) conf.password = decodeURIComponent(uri.password)
