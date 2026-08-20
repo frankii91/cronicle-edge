@@ -7,8 +7,8 @@
         "region": "us-east-1",
         "hostPrefixEnabled": false,
         "credentials": {
-            "accessKeyId": "minioadmin",
-            "secretAccessKey": "minioadmin"
+            "accessKeyId": "",
+            "secretAccessKey": ""
         },
         "correctClockSkew": true,
         "maxRetries": 5,

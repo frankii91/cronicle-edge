@@ -16,9 +16,6 @@ services:
   minio:
     image: bitnami/minio
     hostname: minio
-    ports:
-      - "9000:9000"
-      - "9001:9001"
     volumes:
       - cron_drive_s3:/data
     networks:
@@ -29,8 +26,8 @@ services:
     entrypoint: bash
     command: -c 'mkdir -p /data/cronicle && minio server /data --console-address ":9001"'
     environment:
-      - "MINIO_ROOT_PASSWORD=minioadmin"
-      - "MINIO_ROOT_USER=minioadmin"
+      - "MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD:?Set MINIO_ROOT_PASSWORD to a strong secret}"
+      - "MINIO_ROOT_USER=${MINIO_ROOT_USER:?Set MINIO_ROOT_USER to a non-default value}"
      
   manager1:
     image: cronicle:bundle
@@ -46,7 +43,10 @@ services:
     entrypoint: bash
     command: -c 'curl -I http://minio:9000/minio/health/live && manager'
     environment:
-      - CRONICLE_secret_key = cronicle_secret_key
+      - "CRONICLE_secret_key=${CRONICLE_SECRET_KEY:?Set CRONICLE_SECRET_KEY to a strong secret}"
+      - "CRONICLE_Storage__AWS__endpoint=http://minio:9000"
+      - "CRONICLE_Storage__AWS__credentials__accessKeyId=${MINIO_ROOT_USER:?Set MINIO_ROOT_USER}"
+      - "CRONICLE_Storage__AWS__credentials__secretAccessKey=${MINIO_ROOT_PASSWORD:?Set MINIO_ROOT_PASSWORD}"
     configs:
      - source: cron_s3
        target: /opt/cronicle/conf/storage.json  
@@ -54,15 +54,16 @@ services:
   manager2:
     image: cronicle:bundle
     hostname: manager2
-    ports:
-      - "3013:3012"
     networks:
       - cron
     deploy:
       replicas: 1
     entrypoint: worker
     environment:
-      - CRONICLE_secret_key = cronicle_secret_key
+      - "CRONICLE_secret_key=${CRONICLE_SECRET_KEY:?Set CRONICLE_SECRET_KEY to a strong secret}"
+      - "CRONICLE_Storage__AWS__endpoint=http://minio:9000"
+      - "CRONICLE_Storage__AWS__credentials__accessKeyId=${MINIO_ROOT_USER:?Set MINIO_ROOT_USER}"
+      - "CRONICLE_Storage__AWS__credentials__secretAccessKey=${MINIO_ROOT_PASSWORD:?Set MINIO_ROOT_PASSWORD}"
     configs:
      - source: cron_s3
        target: /opt/cronicle/conf/storage.json
@@ -70,15 +71,16 @@ services:
   manager3:
     image: cronicle:bundle
     hostname: manager3
-    ports:
-      - "3014:3012"
     networks:
       - cron
     deploy:
       replicas: 1
     entrypoint: worker
     environment:
-      - CRONICLE_secret_key = cronicle_secret_key
+      - "CRONICLE_secret_key=${CRONICLE_SECRET_KEY:?Set CRONICLE_SECRET_KEY to a strong secret}"
+      - "CRONICLE_Storage__AWS__endpoint=http://minio:9000"
+      - "CRONICLE_Storage__AWS__credentials__accessKeyId=${MINIO_ROOT_USER:?Set MINIO_ROOT_USER}"
+      - "CRONICLE_Storage__AWS__credentials__secretAccessKey=${MINIO_ROOT_PASSWORD:?Set MINIO_ROOT_PASSWORD}"
     configs:
      - source: cron_s3
        target: /opt/cronicle/conf/storage.json
