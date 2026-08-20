@@ -960,7 +960,7 @@ Class.subclass(Page.Base, "Page.Schedule", {
 				gridTiming = `<s>${gridTiming}</s>`
 				gridTimingTitle = `${inactiveTitle}<br><s>${niceTiming}</s>`
 				niceTiming = `<span title="${inactiveTitle}"><s>${niceTiming}</s>`
-				if (item.ticks) niceTiming += `<span title="Extra Ticks: ${item.ticks}"> <b>+</b> </>`
+				if (item.ticks) niceTiming += `<span title="Extra Ticks: ${encode_entities(item.ticks)}"> <b>+</b> </>`
 
 
 			}

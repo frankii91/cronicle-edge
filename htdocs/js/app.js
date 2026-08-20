@@ -920,7 +920,7 @@ function summarize_event_timing_short(timing) {
 function summarize_event_timing(timing, timezone, extra) {
 	// summarize event timing into human-readable string
 	if (!timing && extra) {
-		return `<span title="${'Extra Ticks: ' + extra.toString().split(/[\,\;\|]/).filter(e => e).join(', ')}">On Demand +</span>`
+		return `<span title="${encode_entities('Extra Ticks: ' + extra.toString().split(/[\,\;\|]/).filter(e => e).join(', '))}">On Demand +</span>`
 	}
 	if (!timing) { return "On demand" };	
 	
@@ -1052,7 +1052,7 @@ function summarize_event_timing(timing, timezone, extra) {
 	
 	if(extra) {
 		let xtitle = extra.toString().split(/[\,\;\|]/).filter(e=>e).join(', ')
-		return `<span title="Extra Ticks: ${xtitle}">${output} +</span>`
+		return `<span title="Extra Ticks: ${encode_entities(xtitle)}">${output} +</span>`
 	}
 	
 	return output
