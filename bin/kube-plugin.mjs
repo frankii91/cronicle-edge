@@ -82,7 +82,6 @@ if (KUBE_CONFIG && KUBE_CONFIG.trim() !== "") {
   try { kc.loadFromString(KUBE_CONFIG) }
   catch {
     printWarning("Invalid kube config setting. Falling back to default")
-    console.log(KUBE_CONFIG)
     kc.loadFromDefault()
   }
 }
