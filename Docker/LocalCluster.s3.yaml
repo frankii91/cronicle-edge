@@ -2,6 +2,10 @@ version: '3.8'
 services:
 
 # multi manager cluster with minio s3 storage
+# Before deploying, create strong, unique secrets:
+# printf '%s' 'cronicle-secret' | docker secret create secret_key -
+# printf '%s' 'minio-user' | docker secret create minio_root_user -
+# printf '%s' 'minio-password' | docker secret create minio_root_password -
 
 # start:
 # docker stack deploy --compose-file  Docker/LocalCluster.s3.yaml cron_stack_s3
@@ -27,10 +31,10 @@ services:
       replicas: 1
     user: root
     entrypoint: bash
-    command: -c 'mkdir -p /data/cronicle && minio server /data --console-address ":9001"'
-    environment:
-      - "MINIO_ROOT_PASSWORD=minioadmin"
-      - "MINIO_ROOT_USER=minioadmin"
+    command: -c 'export MINIO_ROOT_USER="$$(cat /run/secrets/minio_root_user)" MINIO_ROOT_PASSWORD="$$(cat /run/secrets/minio_root_password)"; mkdir -p /data/cronicle && exec minio server /data --console-address ":9001"'
+    secrets:
+      - minio_root_user
+      - minio_root_password
      
   manager1:
     image: cronicle:bundle
@@ -44,9 +48,13 @@ services:
     deploy:
       replicas: 1
     entrypoint: bash
-    command: -c 'curl -I http://minio:9000/minio/health/live && manager'
+    command: -c 'export AWS_ACCESS_KEY_ID="$$(cat /run/secrets/minio_root_user)" AWS_SECRET_ACCESS_KEY="$$(cat /run/secrets/minio_root_password)"; curl -I http://minio:9000/minio/health/live && exec manager'
     environment:
-      - CRONICLE_secret_key = cronicle_secret_key
+      - CRONICLE_secret_key_file=/run/secrets/secret_key
+    secrets:
+      - secret_key
+      - minio_root_user
+      - minio_root_password
     configs:
      - source: cron_s3
        target: /opt/cronicle/conf/storage.json  
@@ -60,9 +68,14 @@ services:
       - cron
     deploy:
       replicas: 1
-    entrypoint: worker
+    entrypoint: bash
+    command: -c 'export AWS_ACCESS_KEY_ID="$$(cat /run/secrets/minio_root_user)" AWS_SECRET_ACCESS_KEY="$$(cat /run/secrets/minio_root_password)"; exec worker'
     environment:
-      - CRONICLE_secret_key = cronicle_secret_key
+      - CRONICLE_secret_key_file=/run/secrets/secret_key
+    secrets:
+      - secret_key
+      - minio_root_user
+      - minio_root_password
     configs:
      - source: cron_s3
        target: /opt/cronicle/conf/storage.json
@@ -76,9 +89,14 @@ services:
       - cron
     deploy:
       replicas: 1
-    entrypoint: worker
+    entrypoint: bash
+    command: -c 'export AWS_ACCESS_KEY_ID="$$(cat /run/secrets/minio_root_user)" AWS_SECRET_ACCESS_KEY="$$(cat /run/secrets/minio_root_password)"; exec worker'
     environment:
-      - CRONICLE_secret_key = cronicle_secret_key
+      - CRONICLE_secret_key_file=/run/secrets/secret_key
+    secrets:
+      - secret_key
+      - minio_root_user
+      - minio_root_password
     configs:
      - source: cron_s3
        target: /opt/cronicle/conf/storage.json
@@ -93,6 +111,14 @@ networks:
 configs:
   cron_s3:
     file: ../sample_conf/examples/storage.s3.json
+
+secrets:
+  secret_key:
+    external: true
+  minio_root_user:
+    external: true
+  minio_root_password:
+    external: true
 
 volumes:
   cron_drive_s3:

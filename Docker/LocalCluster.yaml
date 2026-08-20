@@ -24,13 +24,13 @@ services:
       replicas: 1
     entrypoint: worker
     environment:
-      - CRONICLE_secret_key = cronicle_secret_key
-    # secrets:
-    #   - source: "secret_key"
-    #     target: "secret_key"
-    #     uid: "0"
-    #     gid: "0"
-    #     mode: 0400
+      - CRONICLE_secret_key_file=/run/secrets/secret_key
+    secrets:
+      - source: "secret_key"
+        target: "secret_key"
+        uid: "0"
+        gid: "0"
+        mode: 0400
 
   worker2:
     image: cronicle:bundle
@@ -43,13 +43,13 @@ services:
       replicas: 1
     entrypoint: worker
     environment:
-      - CRONICLE_secret_key = cronicle_secret_key
-    # secrets:
-    #   - source: "secret_key"
-    #     target: "secret_key"
-    #     uid: "0"
-    #     gid: "0"
-    #     mode: 0400
+      - CRONICLE_secret_key_file=/run/secrets/secret_key
+    secrets:
+      - source: "secret_key"
+        target: "secret_key"
+        uid: "0"
+        gid: "0"
+        mode: 0400
  
   manager1:
     image: cronicle:bundle
@@ -64,22 +64,22 @@ services:
       replicas: 1
     entrypoint: manager 
     environment:
-      - CRONICLE_secret_key = cronicle_secret_key
-    # secrets:
-    #   - source: "secret_key"
-    #     target: "secret_key"
-    #     uid: "0"
-    #     gid: "0"
-    #     mode: 0400
+      - CRONICLE_secret_key_file=/run/secrets/secret_key
+    secrets:
+      - source: "secret_key"
+        target: "secret_key"
+        uid: "0"
+        gid: "0"
+        mode: 0400
 
 networks:
   cw:
     driver: overlay
     attachable: true
     
-# secrets:
-#   secret_key:
-#     external: true
+secrets:
+  secret_key:
+    external: true
 
 volumes:
   cron_drive_fs:
