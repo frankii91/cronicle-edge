@@ -752,11 +752,24 @@ Class.subclass(Page.Base, "Page.JobDetails", {
 
 		$.get(`./api/app/get_job_log?id=${id}&session_id=${localStorage.session_id}`, (resp)=>{
 			let size = this.args.tail || 25
-			data = new AnsiUp().ansi_to_html(resp.split("\n").slice(-1*size - 4, -4).join("\n"))
+			const data = new AnsiUp().ansi_to_html(resp.split("\n").slice(-1*size - 4, -4).join("\n"))
 			const newItem = document.createElement('div');
 			newItem.setAttribute('id', 'log_' + id)
             newItem.className = 'wflog grid-item'; // Apply any necessary classes
-            newItem.innerHTML = `<div class="wflog grid-title">${title}<i class="fa fa-window-close" style="float:right; cursor: pointer" onclick="$P().unsetLogIcon('${id}');this.parentNode.parentNode.remove()"></i></div> <pre>${data}</pre>`;
+			const gridTitle = document.createElement('div');
+			gridTitle.className = 'wflog grid-title';
+			gridTitle.textContent = title;
+			const closeIcon = document.createElement('i');
+			closeIcon.className = 'fa fa-window-close';
+			closeIcon.style.cssText = 'float:right; cursor:pointer';
+			closeIcon.addEventListener('click', () => {
+				this.unsetLogIcon(id);
+				newItem.remove();
+			});
+			gridTitle.appendChild(closeIcon);
+			const logOutput = document.createElement('pre');
+			logOutput.innerHTML = data;
+			newItem.append(gridTitle, logOutput);
             const gridContainer = document.getElementById('log_grid');
             gridContainer.appendChild(newItem);
 			

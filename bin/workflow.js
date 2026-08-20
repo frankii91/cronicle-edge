@@ -411,11 +411,11 @@ stream.on('json', function (job) {
 
 		function getNiceTitle(job, id) {
 			if(!job) return ''
-			let title = '<b> ' + job.seq + ' :: ' + (job.title || 'Unknown') + '</b>'
+			let title = job.seq + ' :: ' + (job.title || 'Unknown')
 			// if(id) title = `${id} :: ${title} `
 			// if(job.arg) title = title + ' :: ' + job.arg
 			if(job.arg) title = title + '@' + job.arg
-			return he.encode(title)
+			return encodeURIComponent(title).replace(/'/g, '%27')
 		}
 
 		function getNiceStatus(job) {
@@ -436,7 +436,7 @@ stream.on('json', function (job) {
 				jobStatus[key].start,
 				niceInterval(jobStatus[key].elapsed),
 				getNiceStatus(jobStatus[key]), // status
-				key === jobStatus[key].event ? '' : `<i id="view_${key}" onclick="this.className = this.className == 'fa fa-eye' ? 'fa fa-eye-slash' : 'fa fa-eye'; $P().get_log_to_grid(filterXSS(\`${getNiceTitle(jobStatus[key], key)}\`), '${key}')" style="cursor:pointer" class="fa fa-eye"></i>`,
+				key === jobStatus[key].event ? '' : `<i id="view_${key}" onclick="this.className = this.className == 'fa fa-eye' ? 'fa fa-eye-slash' : 'fa fa-eye'; $P().get_log_to_grid(decodeURIComponent('${getNiceTitle(jobStatus[key], key)}'), '${key}')" style="cursor:pointer" class="fa fa-eye"></i>`,
 				//jobStatus[key].code ? `${he.encode(jobStatus[key].description)}`.substring(0,120) : ''
 				`${he.encode(jobStatus[key].description)}`.substring(0, 120)
 
