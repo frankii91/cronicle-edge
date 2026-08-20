@@ -11,7 +11,7 @@ const print = (text) => {
 	process.stdout.write(text + EOL);
 }
 
-let hostInfo = process.env['JOB_ARG'] || process.env['SSH_HOST'] || ''
+let hostInfo = process.env['SSH_HOST'] || process.env['JOB_ARG'] || ''
 
 let json = parseInt(process.env['JSON'] || '')
 
