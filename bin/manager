@@ -65,9 +65,13 @@ if [[ $cluster ]]; then
 fi
 
 # pull data from git if needed
-# if [ ! -d data/global ] && [ -v GIT_REPO ]; then
-#         git clone $GIT_REPO $HOMEDIR/data
-# fi
+if [ ! -d "$HOMEDIR/data/global" ] && [ -n "$GIT_REPO" ]; then
+  echo "Restoring data from GIT_REPO"
+  if ! git clone -- "$GIT_REPO" "$HOMEDIR/data" || [ ! -d "$HOMEDIR/data/global" ]; then
+    echo "Error: GIT_REPO did not restore valid data; refusing to initialize default storage" >&2
+    exit 1
+  fi
+fi
 
 # check for custom nodejs binary
 if [ -f $HOMEDIR/nodejs/bin/node ]; then
@@ -104,6 +108,4 @@ fi
 
 #$HOMEDIR/bin/control.sh start
 exec $BINARY --echo --foreground --manager --color $color --debug $debug
-
-
 
