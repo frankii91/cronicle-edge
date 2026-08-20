@@ -253,9 +253,9 @@ Class.subclass(Page.Base, "Page.JobDetails", {
 
 		let timing = summarize_event_timing(event.timing, event.timezone)
 
-		let source = job.source || 'Scheduler'
+		let source = encode_entities(job.source || 'Scheduler')
 		if(job.source_id) {
-			source = `<a href="#JobDetails?id=${job.source_id}">${source}</a>`
+			source = `<a href="#JobDetails?id=${encode_entities(job.source_id)}">${source}</a>`
 		}
 
 		html += `
