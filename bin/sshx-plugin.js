@@ -53,7 +53,7 @@ let SCRIPT_BASE64 = Buffer.from(process.env['SCRIPT'] ?? '#!/usr/bin/env sh\nech
 let prefix = process.env['PREFIX'] || ''
 
 // generate stdin script to pass variables and user script in base64 format
-let exclude = ['SSH_HOST', 'SSH_KEY', 'SSH_PASSWORD']
+let exclude = ['SSH_HOST', 'SSH_KEY', 'SSH_PASSWORD', 'SSH_PASSPHRASE', 'JOB_SECRET']
 let include = ['BASE_URL', 'BASE_APP_URL']
 process.env['JOB_CHAIN_DATA'] = JSON.stringify(job.chain_data) || 'has no data'
 
