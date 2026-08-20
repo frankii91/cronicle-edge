@@ -5,13 +5,12 @@ const { Client } = require('ssh2');
 const conn = new Client();
 const {EOL} = require('os')
 const JSONStream = require('pixl-json-stream');
-const { spawn } = require('child_process')
 
 const print = (text) => {
 	process.stdout.write(text + EOL);
 }
 
-let hostInfo = process.env['JOB_ARG'] || process.env['SSH_HOST'] || ''
+let hostInfo = process.env['SSH_HOST'] || process.env['JOB_ARG'] || ''
 
 let json = parseInt(process.env['JSON'] || '')
 
@@ -20,8 +19,6 @@ let command = process.env['SSH_CMD'] ?? 'ls -lah /'
 let script = process.env['SCRIPT']
 
 hostInfo = process.env[hostInfo] || hostInfo
-
-let kill_timer = null
 
 let stderr_msg = ""
 
@@ -35,86 +32,12 @@ function printJSONmessage(complete, code, desc) {
     stream.write({ complete: complete, code: code || 0, description: desc || "" })
 }
 
-    // ================  Run Locally if no host info provided ====================================== //
-    // ================ this would emulate: echo "some command" | sh - =============================//
-
-    if (!hostInfo || hostInfo.toLowerCase() === 'localhost') {
-
-        // ----------- START 
-
-        let json = parseInt(process.env['JSON'] || '')
-
-        const child = process.platform == 'win32' ?  spawn('cmd', ['/c', command]) : spawn('sh', ['-c', command])
-
-        child.on('error', (err) => printJSONmessage(1, 1, `Script failed: ${err.message}`))
-
-        child.on('spawn', () => {
-            print(`[INFO] \x1b[32mRunning locally\x1b[0m\n`)
-            print(`[INFO] \x1b[32mCMD: ${command}\x1b[0m\n`)
-        })
-
-        child.stdout.on('data', (data) => {
-
-            String(data).trim().split('\n').forEach(line => {
-
-                if (line.match(/^\s*(\d+)\%\s*$/)) { // handle progress
-                    let progress = Math.max(0, Math.min(100, parseInt(RegExp.$1))) / 100;
-                    stream.write({progress: progress})
-                }
-                else if (line.match(/^\s*\#(.{1,140})\#\s*$/)) { // handle memo
-                    let memoText = RegExp.$1
-                    stream.write({
-                        memo: memoText
-                    })
-                }
-                else {
-                    // adding ANSI sequence (grey-ish color) to prevent JSON interpretation
-                    print(json ? line : `\x1b[109m${line}\x1b[0m` + "\r")
-                }
-            }) // foreach    
-        })
-
-        child.stderr.on('data', (data) => {
-            let d = String(data).trim()
-            if (d) {
-                print(`\x1b[31m${d}\x1b[0m`); // red
-                stderr_msg = d.split("\n")[0].substring(0, 128)
-            }
-        })
-
-        // ------------ Exit
-
-        child.on('exit', function (code, signal) {
-            // child exited
-            if (kill_timer) clearTimeout(kill_timer)
-            code = (code || signal || 0)
-            printJSONmessage(1, code, code ? `Script exited with code: ${code}; ${stderr_msg}} ` : "")
-        });
-
-        // silence EPIPE errors on child STDIN
-        child.stdin.on('error', (err) => { })
-
-        // Handle shutdown
-        process.on('SIGTERM', function () {
-            print("Caught SIGTERM, killing child: " + child.pid);
-
-            kill_timer = setTimeout(function () {
-                // child didn't die, kill with prejudice
-                print("Child did not exit, killing harder: " + child.pid);
-                child.kill('SIGKILL');
-            }, 9 * 1000);
-
-            // try killing nicely first
-            child.kill('SIGTERM');
-        });
-
-        child.stdin.write(script + "\n")
-        child.stdin.end()
+    if (!hostInfo) {
+        printJSONmessage(1, 1, "Host info is not provided. Specify SSH_HOST parameter or pass it via Workflow argument")
+        process.exit(1)
     }
 
     // ================  RUN OVER SSH ====================================== //
-
-    else {
 
         if (!hostInfo.startsWith('sftp://')) hostInfo = 'sftp://' + hostInfo
 
@@ -233,4 +156,3 @@ function printJSONmessage(complete, code, desc) {
                 conn.end()
             }
         })
-    } /// run remote
