@@ -294,8 +294,8 @@ Class.subclass(Page.Base, "Page.Schedule", {
 		   `
 
 			let wfe = wf_events[idx]
-			let eventId = `<span class="link" style="font-weight:bold; white-space:nowrap;"><a href="#Schedule?sub=edit_event&id=${wfe.id}" target="_blank">${wfe.id}</a></span>`
-			let title = `${schedTitles[wfe.id] || '<span style="color:red">[Unknown]</span>'}`.substring(0, 40)
+			let eventId = `<span class="link" style="font-weight:bold; white-space:nowrap;"><a href="#Schedule?sub=edit_event&id=${encodeURIComponent(wfe.id)}" target="_blank">${encode_entities(wfe.id)}</a></span>`
+			let title = schedTitles[wfe.id] ? encode_entities(`${schedTitles[wfe.id]}`.substring(0, 40)) : '<span style="color:red">[Unknown]</span>'
 			let arg = wfe.arg || ''
 			if (arg.length > 40) arg = arg.substring(0, 37) + '...'
 			let argInfo = wfe.arg ? `<span title="refer to JOB_ARG env variable"><u>${encode_entities(arg)}<u></span>` : '-'
@@ -428,12 +428,13 @@ Class.subclass(Page.Base, "Page.Schedule", {
 		// show dialog to edit or add wf event
 		let self = this;
 		let evt = self.event.workflow[idx] //self.wf.event_list[idx]
-		let event_list = render_menu_options([evt], evt.id)
+		let event_title = (find_object(app.schedule, { id: evt.id }) || evt).title || evt.id
+		let event_list = `<option value="${escape_text_field_value(evt.id)}" selected>${encode_entities(event_title)}</option>`
 		let el_style = 'width: 240px;  font-size:16px;'
 		let html = '<table>' +
 			get_form_table_row('Event', `<select id="fe_ee_pp_wf_select_event" style="${el_style}" disabled>${event_list}</select>`) +
 			get_form_table_spacer() +
-			get_form_table_row('Job Argument', `<input type="text" id="fe_ee_pp_wf_evt_arg" size="30" value="${evt.arg}" spellcheck="false"/>`) +
+			get_form_table_row('Job Argument', `<input type="text" id="fe_ee_pp_wf_evt_arg" size="30" value="${escape_text_field_value(evt.arg || '')}" spellcheck="false"/>`) +
 			'</table>'
 
 		app.confirm('<i class="fa fa-clock-o">&nbsp;&nbsp;</i>Edit Event Options', html, "OK", function (result) {
