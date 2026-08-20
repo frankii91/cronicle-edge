@@ -6,6 +6,7 @@ import { readFileSync } from 'fs'
 import { PassThrough } from 'stream';
 import { EOL } from 'os'
 import { load } from 'js-yaml'
+import { validateKubeConfig } from './kube-config.mjs'
 
 // cronicle should send job json to stdin
 let job = {}
@@ -79,10 +80,12 @@ if(typeof params.pvc === 'string' && params.pvc.trim() !== '') {
 const kc = new KubeConfig();
 
 if (KUBE_CONFIG && KUBE_CONFIG.trim() !== "") {
-  try { kc.loadFromString(KUBE_CONFIG) }
+  try {
+    validateKubeConfig(KUBE_CONFIG)
+    kc.loadFromString(KUBE_CONFIG)
+  }
   catch {
     printWarning("Invalid kube config setting. Falling back to default")
-    console.log(KUBE_CONFIG)
     kc.loadFromDefault()
   }
 }
