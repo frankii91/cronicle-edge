@@ -188,7 +188,7 @@ Class.subclass( Page.Base, "Page.Home", {
 		let errBg = stats.jobs_completed > 0 && (stats.jobs_failed || 0)/stats.jobs_completed > (parseFloat(ui.err_rate) || 0.03) ? 'red2' : 'gray'
 		let errorLog = Object.entries(stats.errorLog || {})
 		let runs_failed = Object.values(stats.errorLog || {}).reduce((a,b)=>a+b, 0)
-		let errTitle = errorLog.slice(0,21).sort((a,b)=> a[1] < b[1] ? 1 : -1).map(e=>`${e[0]}:\t<b>${e[1]}</b>`).join("\n")
+		let errTitle = errorLog.slice(0,21).sort((a,b)=> a[1] < b[1] ? 1 : -1).map(e=>`${escape_text_field_value(e[0])}:\t<b>${e[1]}</b>`).join("\n")
 		if(stats.jobs_failed > runs_failed ) errTitle  = `<u>Failed to start: <b>${stats.jobs_failed - runs_failed }</b></u> \n` + errTitle 
     // xhtml
 
