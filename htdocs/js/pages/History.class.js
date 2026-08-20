@@ -852,7 +852,7 @@ Class.subclass( Page.Base, "Page.History", {
 			if (job.cpu) cpu_avg = short_float( (job.cpu.total || 0) / (job.cpu.count || 1) );
 			if (job.mem) mem_avg = short_float( (job.mem.total || 0) / (job.mem.count || 1) );
 			
-			var errorTitle = job.description ? job.description.replace(/\x1B\[[0-?]*[ -/]*[@-~]/g, "") : " " 
+			var errorTitle = job.description ? encode_entities(job.description.replace(/\x1B\[[0-?]*[ -/]*[@-~]/g, "")) : " "
 			var jobStatusHist = (job.code == 0) ? '<span class="color_label green"><i class="fa fa-check">&nbsp;</i>Success</span>' : `<span title="${errorTitle}" class="color_label red"><i class="fa fa-warning">&nbsp;</i>Error</span>`
 			if(job.code == 255) {jobStatusHist = `<span title="${errorTitle}" class="color_label yellow"><i class="fa fa-warning">&nbsp;</i>Warning</span>`}
 
