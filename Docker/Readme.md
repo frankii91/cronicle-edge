@@ -37,7 +37,7 @@ If you have multiple machines it's a good idea to set up a swarm cluster. It's s
 
  ```bash
  docker network create --driver overlay cron
- mkdir -p /var/data/cronicle/v1/data # could be anything, but should be in line with step 3 (--mount arg)
+ install -d -m 0700 /var/data/cronicle/v1/data # could be anything, but should be in line with step 3 (--mount arg)
  ```
  
 
