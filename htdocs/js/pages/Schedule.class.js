@@ -791,7 +791,7 @@ Class.subclass(Page.Base, "Page.Schedule", {
 		let isGrid = eventView === 'grid' || eventView === 'gridall'
 
 		html += `
-		 <div class="subtitle flex-container" style="height:auto;padding:8px">
+		 <div class="subtitle flex-container" style="height:auto;padding:8px 0">
 		 <div style="width: calc(45%)">Scheduled Events ${cycleWarning}</div>
 		 <div class="flex-container" style="width:calc(10%)">${miniButtons}</div>
 		 <div style="width: calc(45%);padding-right:10px">
@@ -1119,7 +1119,7 @@ Class.subclass(Page.Base, "Page.Schedule", {
 		}
 
 		html += '<td><div class="button" style="width:130px;" onMouseUp="$P().show_graph()"><i class="fa fa-pie-chart">&nbsp;&nbsp;</i>Show Graph</div></td><td width="40">&nbsp;</td>';
-		this.div.html(html);
+		this.div.html('<div style="padding:0 20px">' + html + '</div>');
 		if (!isGrid) this.init_schedule_columns();
 		this.update_job_last_runs();
 
